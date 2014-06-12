@@ -1,6 +1,8 @@
 package consulapi
 
 import (
+	crand "crypto/rand"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -13,6 +15,20 @@ func makeClient(t *testing.T) *Client {
 		t.Fatalf("err: %v", err)
 	}
 	return client
+}
+
+func testKey() string {
+	buf := make([]byte, 16)
+	if _, err := crand.Read(buf); err != nil {
+		panic(fmt.Errorf("Failed to read random bytes: %v", err))
+	}
+
+	return fmt.Sprintf("%08x-%04x-%04x-%04x-%12x",
+		buf[0:4],
+		buf[4:6],
+		buf[6:8],
+		buf[8:10],
+		buf[10:16])
 }
 
 func TestSetQueryOptions(t *testing.T) {
