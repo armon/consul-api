@@ -1,6 +1,7 @@
 package consulapi
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -109,11 +110,15 @@ type request struct {
 	url    *url.URL
 	params url.Values
 	body   io.Reader
+	obj    interface{}
 }
 
 // setQueryOptions is used to annotate the request with
 // additional query options
 func (r *request) setQueryOptions(q *QueryOptions) {
+	if q == nil {
+		return
+	}
 	if q.Datacenter != "" {
 		r.params.Set("dc", q.Datacenter)
 	}
@@ -127,17 +132,23 @@ func (r *request) setQueryOptions(q *QueryOptions) {
 		r.params.Set("index", strconv.FormatUint(q.WaitIndex, 10))
 	}
 	if q.WaitTime != 0 {
-		waitMsec := fmt.Sprintf("%dms", q.WaitTime/time.Millisecond)
-		r.params.Set("wait", waitMsec)
+		r.params.Set("wait", durToMsec(q.WaitTime))
 	} else if r.config.WaitTime != 0 {
-		waitMsec := fmt.Sprintf("%dms", r.config.WaitTime/time.Millisecond)
-		r.params.Set("wait", waitMsec)
+		r.params.Set("wait", durToMsec(r.config.WaitTime))
 	}
+}
+
+// durToMsec converts a duration to a millisecond specified string
+func durToMsec(dur time.Duration) string {
+	return fmt.Sprintf("%dms", dur/time.Millisecond)
 }
 
 // setWriteOptions is used to annotate the request with
 // additional write options
 func (r *request) setWriteOptions(q *WriteOptions) {
+	if q == nil {
+		return
+	}
 	if q.Datacenter != "" {
 		r.params.Set("dc", q.Datacenter)
 	}
@@ -150,6 +161,15 @@ func (r *request) toHTTP() (*http.Request, error) {
 
 	// Get the url sring
 	urlRaw := r.url.String()
+
+	// Check if we should encode the body
+	if r.body == nil && r.obj != nil {
+		if b, err := encodeBody(r.obj); err != nil {
+			return nil, err
+		} else {
+			r.body = b
+		}
+	}
 
 	// Create the HTTP request
 	return http.NewRequest(r.method, urlRaw, r.body)
@@ -174,7 +194,11 @@ func (c *Client) newRequest(method, path string) *request {
 }
 
 // doRequest runs a request with our client
-func (c *Client) doRequest(req *http.Request) (time.Duration, *http.Response, error) {
+func (c *Client) doRequest(r *request) (time.Duration, *http.Response, error) {
+	req, err := r.toHTTP()
+	if err != nil {
+		return 0, nil, err
+	}
 	start := time.Now()
 	resp, err := c.config.HttpClient.Do(req)
 	diff := time.Now().Sub(start)
@@ -214,4 +238,25 @@ func decodeBody(resp *http.Response, out interface{}) error {
 	defer resp.Body.Close()
 	dec := json.NewDecoder(resp.Body)
 	return dec.Decode(out)
+}
+
+// encodeBody is used to encode a request body
+func encodeBody(obj interface{}) (io.Reader, error) {
+	buf := bytes.NewBuffer(nil)
+	enc := json.NewEncoder(buf)
+	if err := enc.Encode(obj); err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+// requireOK is used to wrap doRequest and check for a 200
+func requireOK(d time.Duration, resp *http.Response, e error) (time.Duration, *http.Response, error) {
+	if e != nil {
+		return d, resp, e
+	}
+	if resp.StatusCode != 200 {
+		return d, resp, fmt.Errorf("Request failed with error %d", resp.StatusCode)
+	}
+	return d, resp, e
 }

@@ -13,12 +13,7 @@ func (c *Client) Status() *Status {
 // Leader is used to query for a known leader
 func (s *Status) Leader() (string, error) {
 	r := s.c.newRequest("GET", "/v1/status/leader")
-	req, err := r.toHTTP()
-	if err != nil {
-		return "", err
-	}
-
-	_, resp, err := s.c.doRequest(req)
+	_, resp, err := requireOK(s.c.doRequest(r))
 	if err != nil {
 		return "", err
 	}
@@ -33,12 +28,7 @@ func (s *Status) Leader() (string, error) {
 // Peers is used to query for a known raft peers
 func (s *Status) Peers() ([]string, error) {
 	r := s.c.newRequest("GET", "/v1/status/peers")
-	req, err := r.toHTTP()
-	if err != nil {
-		return nil, err
-	}
-
-	_, resp, err := s.c.doRequest(req)
+	_, resp, err := requireOK(s.c.doRequest(r))
 	if err != nil {
 		return nil, err
 	}
