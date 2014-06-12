@@ -110,18 +110,6 @@ type request struct {
 	body   io.Reader
 }
 
-// toHTTP converts the request to an HTTP request
-func (r *request) toHTTP() (*http.Request, error) {
-	// Encode the query parameters
-	r.url.RawQuery = r.params.Encode()
-
-	// Get the url sring
-	urlRaw := r.url.String()
-
-	// Create the HTTP request
-	return http.NewRequest(r.method, urlRaw, r.body)
-}
-
 // setQueryOptions is used to annotate the request with
 // additional query options
 func (r *request) setQueryOptions(q *QueryOptions) {
@@ -154,11 +142,23 @@ func (r *request) setWriteOptions(q *WriteOptions) {
 	}
 }
 
+// toHTTP converts the request to an HTTP request
+func (r *request) toHTTP() (*http.Request, error) {
+	// Encode the query parameters
+	r.url.RawQuery = r.params.Encode()
+
+	// Get the url sring
+	urlRaw := r.url.String()
+
+	// Create the HTTP request
+	return http.NewRequest(r.method, urlRaw, r.body)
+}
+
 // newRequest is used to create a new request
 func (c *Client) newRequest(method, path string) *request {
 	r := &request{
 		config: &c.config,
-		method: "GET",
+		method: method,
 		url: &url.URL{
 			Scheme: "http",
 			Host:   c.config.Address,
@@ -178,4 +178,32 @@ func (c *Client) doRequest(req *http.Request) (time.Duration, *http.Response, er
 	resp, err := c.config.HttpClient.Do(req)
 	diff := time.Now().Sub(start)
 	return diff, resp, err
+}
+
+// parseQueryMeta is used to help parse query meta-data
+func parseQueryMeta(resp *http.Response, q *QueryMeta) error {
+	header := resp.Header
+
+	// Parse the X-Consul-Index
+	index, err := strconv.ParseUint(header.Get("X-Consul-Index"), 10, 64)
+	if err != nil {
+		return fmt.Errorf("Failed to parse X-Consul-Index: %v", err)
+	}
+	q.LastIndex = index
+
+	// Parse the X-Consul-LastContact
+	last, err := strconv.ParseUint(header.Get("X-Consul-LastContact"), 10, 64)
+	if err != nil {
+		return fmt.Errorf("Failed to parse X-Consul-LastContact: %v", err)
+	}
+	q.LastContact = time.Duration(last) * time.Millisecond
+
+	// Parse the X-Consul-KnownLeader
+	switch header.Get("X-Consul-KnownLeader") {
+	case "true":
+		q.KnownLeader = true
+	default:
+		q.KnownLeader = false
+	}
+	return nil
 }
