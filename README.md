@@ -10,6 +10,17 @@ Documentation
 
 The full documentation is available on [Godoc](http://godoc.org/github.com/armon/consul-api)
 
+Status
+======
+
+The current status of the API:
+* kv - Complete
+* session - Complete
+* status - Complete
+* agent - Partial
+* catalog - Not started
+* health - Not started
+
 Usage
 =====
 

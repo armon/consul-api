@@ -256,7 +256,7 @@ func requireOK(d time.Duration, resp *http.Response, e error) (time.Duration, *h
 		return d, resp, e
 	}
 	if resp.StatusCode != 200 {
-		return d, resp, fmt.Errorf("Request failed with error %d", resp.StatusCode)
+		return d, resp, fmt.Errorf("Unexpected response code: %d", resp.StatusCode)
 	}
 	return d, resp, e
 }
