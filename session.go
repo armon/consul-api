@@ -75,6 +75,7 @@ func (s *Session) create(obj interface{}, q *WriteOptions) (string, *WriteMeta, 
 	if err != nil {
 		return "", nil, err
 	}
+	defer resp.Body.Close()
 
 	wm := &WriteMeta{RequestTime: rtt}
 	var out struct{ ID string }
@@ -88,10 +89,11 @@ func (s *Session) create(obj interface{}, q *WriteOptions) (string, *WriteMeta, 
 func (s *Session) Destroy(id string, q *WriteOptions) (*WriteMeta, error) {
 	r := s.c.newRequest("PUT", "/v1/session/destroy/"+id)
 	r.setWriteOptions(q)
-	rtt, _, err := requireOK(s.c.doRequest(r))
+	rtt, resp, err := requireOK(s.c.doRequest(r))
 	if err != nil {
 		return nil, err
 	}
+	resp.Body.Close()
 
 	wm := &WriteMeta{RequestTime: rtt}
 	return wm, nil
@@ -105,6 +107,7 @@ func (s *Session) Info(id string, q *QueryOptions) (*SessionEntry, *QueryMeta, e
 	if err != nil {
 		return nil, nil, err
 	}
+	defer resp.Body.Close()
 
 	qm := &QueryMeta{}
 	parseQueryMeta(resp, qm)
@@ -129,6 +132,7 @@ func (s *Session) Node(node string, q *QueryOptions) ([]*SessionEntry, *QueryMet
 	if err != nil {
 		return nil, nil, err
 	}
+	defer resp.Body.Close()
 
 	qm := &QueryMeta{}
 	parseQueryMeta(resp, qm)
@@ -149,6 +153,7 @@ func (s *Session) List(q *QueryOptions) ([]*SessionEntry, *QueryMeta, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	defer resp.Body.Close()
 
 	qm := &QueryMeta{}
 	parseQueryMeta(resp, qm)

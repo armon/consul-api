@@ -42,6 +42,7 @@ func (k *KV) Get(key string, q *QueryOptions) (*KVPair, *QueryMeta, error) {
 	if resp == nil {
 		return nil, qm, nil
 	}
+	defer resp.Body.Close()
 
 	var entries []*KVPair
 	if err := decodeBody(resp, &entries); err != nil {
@@ -62,6 +63,7 @@ func (k *KV) List(prefix string, q *QueryOptions) (KVPairs, *QueryMeta, error) {
 	if resp == nil {
 		return nil, qm, nil
 	}
+	defer resp.Body.Close()
 
 	var entries []*KVPair
 	if err := decodeBody(resp, &entries); err != nil {
@@ -84,6 +86,7 @@ func (k *KV) Keys(prefix, separator string, q *QueryOptions) ([]string, *QueryMe
 	if resp == nil {
 		return nil, qm, nil
 	}
+	defer resp.Body.Close()
 
 	var entries []string
 	if err := decodeBody(resp, &entries); err != nil {
@@ -173,6 +176,7 @@ func (k *KV) put(key string, params map[string]string, body []byte, q *WriteOpti
 	if err != nil {
 		return false, nil, err
 	}
+	defer resp.Body.Close()
 
 	qm := &WriteMeta{}
 	qm.RequestTime = rtt
@@ -201,10 +205,11 @@ func (k *KV) deleteInternal(key string, params []string, q *WriteOptions) (*Writ
 	for _, param := range params {
 		r.params.Set(param, "")
 	}
-	rtt, _, err := requireOK(k.c.doRequest(r))
+	rtt, resp, err := requireOK(k.c.doRequest(r))
 	if err != nil {
 		return nil, err
 	}
+	resp.Body.Close()
 
 	qm := &WriteMeta{}
 	qm.RequestTime = rtt

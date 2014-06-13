@@ -17,6 +17,7 @@ func (s *Status) Leader() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer resp.Body.Close()
 
 	var leader string
 	if err := decodeBody(resp, &leader); err != nil {
@@ -32,6 +33,7 @@ func (s *Status) Peers() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	var peers []string
 	if err := decodeBody(resp, &peers); err != nil {

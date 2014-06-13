@@ -18,6 +18,7 @@ func (a *Agent) Self() (map[string]map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	var out map[string]map[string]interface{}
 	if err := decodeBody(resp, &out); err != nil {
