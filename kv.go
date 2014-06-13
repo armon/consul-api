@@ -111,8 +111,10 @@ func (k *KV) getInternal(key string, params []string, q *QueryOptions) (*http.Re
 	qm.RequestTime = rtt
 
 	if resp.StatusCode == 404 {
+		resp.Body.Close()
 		return nil, qm, nil
 	} else if resp.StatusCode != 200 {
+		resp.Body.Close()
 		return nil, nil, fmt.Errorf("Unexpected response code: %d", resp.StatusCode)
 	}
 	return resp, qm, nil
