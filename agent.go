@@ -1,5 +1,9 @@
 package consulapi
 
+import (
+	"fmt"
+)
+
 // AgentCheck represents a check known to the agent
 type AgentCheck struct {
 	Node        string
@@ -148,6 +152,41 @@ func (a *Agent) ServiceRegister(service *AgentServiceRegistration) error {
 // the local agent
 func (a *Agent) ServiceDeregister(serviceID string) error {
 	r := a.c.newRequest("PUT", "/v1/agent/service/deregister/"+serviceID)
+	_, resp, err := requireOK(a.c.doRequest(r))
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+	return nil
+}
+
+// PassTTL is used to set a TTL check to the passing state
+func (a *Agent) PassTTL(checkID, note string) error {
+	return a.UpdateTTL(checkID, note, "pass")
+}
+
+// WarnTTL is used to set a TTL check to the warning state
+func (a *Agent) WarnTTL(checkID, note string) error {
+	return a.UpdateTTL(checkID, note, "warn")
+}
+
+// FailTTL is used to set a TTL check to the failing state
+func (a *Agent) FailTTL(checkID, note string) error {
+	return a.UpdateTTL(checkID, note, "fail")
+}
+
+// UpdateTTL is used to update the TTL of a check
+func (a *Agent) UpdateTTL(checkID, note, status string) error {
+	switch status {
+	case "pass":
+	case "warn":
+	case "fail":
+	default:
+		return fmt.Errorf("Invalid status: %s", status)
+	}
+	endpoint := fmt.Sprintf("/v1/agent/check/%s/%s", status, checkID)
+	r := a.c.newRequest("PUT", endpoint)
+	r.params.Set("note", note)
 	_, resp, err := requireOK(a.c.doRequest(r))
 	if err != nil {
 		return err

@@ -69,3 +69,41 @@ func TestAgent_Services(t *testing.T) {
 		t.Fatalf("err: %v", err)
 	}
 }
+
+func TestAgent_SetTTLStatus(t *testing.T) {
+	c := makeClient(t)
+	agent := c.Agent()
+
+	reg := &AgentServiceRegistration{
+		Name: "foo",
+		Check: &AgentServiceCheck{
+			TTL: "15s",
+		},
+	}
+	if err := agent.ServiceRegister(reg); err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	if err := agent.WarnTTL("service:foo", "test"); err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	checks, err := agent.Checks()
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	chk, ok := checks["service:foo"]
+	if !ok {
+		t.Fatalf("missing check: %v", checks)
+	}
+	if chk.Status != "warning" {
+		t.Fatalf("Bad: %#v", chk)
+	}
+	if chk.Output != "test" {
+		t.Fatalf("Bad: %#v", chk)
+	}
+
+	if err := agent.ServiceDeregister("foo"); err != nil {
+		t.Fatalf("err: %v", err)
+	}
+}
