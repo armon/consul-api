@@ -35,6 +35,23 @@ type AgentMember struct {
 	DelegateCur uint8
 }
 
+// AgentServiceRegistration is used to register a new service
+type AgentServiceRegistration struct {
+	ID    string   `json:",omitempty"`
+	Name  string   `json:",omitempty"`
+	Tags  []string `json:",omitempty"`
+	Port  int      `json:",omitempty"`
+	Check *AgentServiceCheck
+}
+
+// AgentServiceCheck is used to create an associated
+// check for a service
+type AgentServiceCheck struct {
+	Script   string `json:",omitempty"`
+	Interval string `json:",omitempty"`
+	TTL      string `json:",omitempty"`
+}
+
 // Agent can be used to query the Agent endpoints
 type Agent struct {
 	c *Client
@@ -112,4 +129,29 @@ func (a *Agent) Members(wan bool) ([]*AgentMember, error) {
 		return nil, err
 	}
 	return out, nil
+}
+
+// ServiceRegister is used to register a new service with
+// the local agent
+func (a *Agent) ServiceRegister(service *AgentServiceRegistration) error {
+	r := a.c.newRequest("PUT", "/v1/agent/service/register")
+	r.obj = service
+	_, resp, err := requireOK(a.c.doRequest(r))
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+	return nil
+}
+
+// ServiceDeregister is used to deregister a service with
+// the local agent
+func (a *Agent) ServiceDeregister(serviceID string) error {
+	r := a.c.newRequest("PUT", "/v1/agent/service/deregister/"+serviceID)
+	_, resp, err := requireOK(a.c.doRequest(r))
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+	return nil
 }
