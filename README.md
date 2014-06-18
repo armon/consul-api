@@ -17,7 +17,7 @@ The current status of the API:
 * kv - Complete
 * session - Complete
 * status - Complete
-* agent - Partial
+* agent - Complete
 * catalog - Not started
 * health - Not started
 

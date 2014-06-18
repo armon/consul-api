@@ -227,3 +227,29 @@ func (a *Agent) CheckDeregister(checkID string) error {
 	resp.Body.Close()
 	return nil
 }
+
+// Join is used to instruct the agent to attempt a join to
+// another cluster member
+func (a *Agent) Join(addr string, wan bool) error {
+	r := a.c.newRequest("PUT", "/v1/agent/join/"+addr)
+	if wan {
+		r.params.Set("wan", "1")
+	}
+	_, resp, err := requireOK(a.c.doRequest(r))
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+	return nil
+}
+
+// ForceLeave is used to have the agent eject a failed node
+func (a *Agent) ForceLeave(node string) error {
+	r := a.c.newRequest("PUT", "/v1/agent/force-leave/"+node)
+	_, resp, err := requireOK(a.c.doRequest(r))
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+	return nil
+}

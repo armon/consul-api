@@ -132,3 +132,31 @@ func TestAgent_Checks(t *testing.T) {
 		t.Fatalf("err: %v", err)
 	}
 }
+
+func TestAgent_Join(t *testing.T) {
+	c := makeClient(t)
+	agent := c.Agent()
+
+	info, err := agent.Self()
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	// Join ourself
+	addr := info["Config"]["AdvertiseAddr"].(string)
+	err = agent.Join(addr, false)
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+}
+
+func TestAgent_ForceLeave(t *testing.T) {
+	c := makeClient(t)
+	agent := c.Agent()
+
+	// Eject somebody
+	err := agent.ForceLeave("foo")
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+}
