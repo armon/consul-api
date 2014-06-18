@@ -48,6 +48,14 @@ type AgentServiceRegistration struct {
 	Check *AgentServiceCheck
 }
 
+// AgentCheckRegistration is used to register a new check
+type AgentCheckRegistration struct {
+	ID    string `json:",omitempty"`
+	Name  string `json:",omitempty"`
+	Notes string `json:",omitempty"`
+	AgentServiceCheck
+}
+
 // AgentServiceCheck is used to create an associated
 // check for a service
 type AgentServiceCheck struct {
@@ -187,6 +195,31 @@ func (a *Agent) UpdateTTL(checkID, note, status string) error {
 	endpoint := fmt.Sprintf("/v1/agent/check/%s/%s", status, checkID)
 	r := a.c.newRequest("PUT", endpoint)
 	r.params.Set("note", note)
+	_, resp, err := requireOK(a.c.doRequest(r))
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+	return nil
+}
+
+// CheckRegister is used to register a new check with
+// the local agent
+func (a *Agent) CheckRegister(check *AgentCheckRegistration) error {
+	r := a.c.newRequest("PUT", "/v1/agent/check/register")
+	r.obj = check
+	_, resp, err := requireOK(a.c.doRequest(r))
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+	return nil
+}
+
+// CheckDeregister is used to deregister a check with
+// the local agent
+func (a *Agent) CheckDeregister(checkID string) error {
+	r := a.c.newRequest("PUT", "/v1/agent/check/deregister/"+checkID)
 	_, resp, err := requireOK(a.c.doRequest(r))
 	if err != nil {
 		return err
