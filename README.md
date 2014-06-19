@@ -18,8 +18,8 @@ The current status of the API:
 * session - Complete
 * status - Complete
 * agent - Complete
+* health - Complete
 * catalog - Not started
-* health - Not started
 
 Usage
 =====
