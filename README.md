@@ -32,7 +32,7 @@ client, _ := consulapi.NewClient(consulapi.DefaultConfig())
 kv := client.KV()
 
 // PUT a new KV pair
-p := &KVPair{Key: "foo", Value: []byte("test")}
+p := &consulapi.KVPair{Key: "foo", Value: []byte("test")}
 _, err := kv.Put(p, nil)
 if err != nil {
     panic(err)
