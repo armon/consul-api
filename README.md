@@ -19,7 +19,7 @@ The current status of the API:
 * status - Complete
 * agent - Complete
 * health - Complete
-* catalog - Not started
+* catalog - All query endpoints
 
 Usage
 =====

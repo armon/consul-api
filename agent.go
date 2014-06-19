@@ -67,11 +67,14 @@ type AgentServiceCheck struct {
 // Agent can be used to query the Agent endpoints
 type Agent struct {
 	c *Client
+
+	// cache the node name
+	nodeName string
 }
 
 // Agent returns a handle to the agent endpoints
 func (c *Client) Agent() *Agent {
-	return &Agent{c}
+	return &Agent{c: c}
 }
 
 // Self is used to query the agent we are speaking to for
@@ -89,6 +92,20 @@ func (a *Agent) Self() (map[string]map[string]interface{}, error) {
 		return nil, err
 	}
 	return out, nil
+}
+
+// NodeName is used to get the node name of the agent
+func (a *Agent) NodeName() (string, error) {
+	if a.nodeName != "" {
+		return a.nodeName, nil
+	}
+	info, err := a.Self()
+	if err != nil {
+		return "", err
+	}
+	name := info["Config"]["NodeName"].(string)
+	a.nodeName = name
+	return name, nil
 }
 
 // Checks returns the locally registered checks

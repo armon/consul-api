@@ -4,11 +4,6 @@ import (
 	"fmt"
 )
 
-type Node struct {
-	Node    string
-	Address string
-}
-
 // HealthCheck is used to represent a single check
 type HealthCheck struct {
 	Node        string
