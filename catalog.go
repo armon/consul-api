@@ -45,26 +45,36 @@ func (c *Client) Catalog() *Catalog {
 	return &Catalog{c}
 }
 
-func (c *Catalog) Register(reg *CatalogRegistration) error {
+func (c *Catalog) Register(reg *CatalogRegistration, q *WriteOptions) (*WriteMeta, error) {
 	r := c.c.newRequest("PUT", "/v1/catalog/register")
+	r.setWriteOptions(q)
 	r.obj = reg
-	_, resp, err := requireOK(c.c.doRequest(r))
+	rtt, resp, err := requireOK(c.c.doRequest(r))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	resp.Body.Close()
-	return nil
+
+	wm := &WriteMeta{}
+	wm.RequestTime = rtt
+
+	return wm, nil
 }
 
-func (c *Catalog) Deregister(dereg *CatalogDeregistration) error {
+func (c *Catalog) Deregister(dereg *CatalogDeregistration, q *WriteOptions) (*WriteMeta, error) {
 	r := c.c.newRequest("PUT", "/v1/catalog/deregister")
+	r.setWriteOptions(q)
 	r.obj = dereg
-	_, resp, err := requireOK(c.c.doRequest(r))
+	rtt, resp, err := requireOK(c.c.doRequest(r))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	resp.Body.Close()
-	return nil
+
+	wm := &WriteMeta{}
+	wm.RequestTime = rtt
+
+	return wm, nil
 }
 
 // Datacenters is used to query for all the known datacenters

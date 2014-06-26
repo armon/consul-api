@@ -118,7 +118,7 @@ func TestCatalog_Registration(t *testing.T) {
 		Check:      check,
 	}
 
-	err := catalog.Register(reg)
+	_, err := catalog.Register(reg, nil)
 
 	if err != nil {
 		t.Fatalf("err: %v", err)
@@ -156,7 +156,7 @@ func TestCatalog_Deregistration(t *testing.T) {
 		ServiceID:  "redis1",
 	}
 
-	err := catalog.Deregister(dereg)
+	_, err := catalog.Deregister(dereg, nil)
 
 	if err != nil {
 		t.Fatalf("err: %v", err)
@@ -179,7 +179,7 @@ func TestCatalog_Deregistration(t *testing.T) {
 		CheckID:    "service:redis1",
 	}
 
-	err = catalog.Deregister(dereg)
+	_, err = catalog.Deregister(dereg, nil)
 
 	if err != nil {
 		t.Fatalf("err: %v", err)
@@ -201,7 +201,7 @@ func TestCatalog_Deregistration(t *testing.T) {
 		Address:    "192.168.10.10",
 	}
 
-	err = catalog.Deregister(dereg)
+	_, err = catalog.Deregister(dereg, nil)
 
 	if err != nil {
 		t.Fatalf("err: %v", err)
