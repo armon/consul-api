@@ -19,6 +19,22 @@ type CatalogNode struct {
 	Services map[string]*AgentService
 }
 
+type CatalogRegistration struct {
+	Node       string
+	Address    string
+	Datacenter string
+	Service    *AgentService
+	Check      *AgentCheck
+}
+
+type CatalogDeregistration struct {
+	Node       string
+	Address    string
+	Datacenter string
+	ServiceID  string
+	CheckID    string
+}
+
 // Catalog can be used to query the Catalog endpoints
 type Catalog struct {
 	c *Client
@@ -29,13 +45,37 @@ func (c *Client) Catalog() *Catalog {
 	return &Catalog{c}
 }
 
-// TODO
-//func (c *Catalog) Register() {
-//}
+func (c *Catalog) Register(reg *CatalogRegistration, q *WriteOptions) (*WriteMeta, error) {
+	r := c.c.newRequest("PUT", "/v1/catalog/register")
+	r.setWriteOptions(q)
+	r.obj = reg
+	rtt, resp, err := requireOK(c.c.doRequest(r))
+	if err != nil {
+		return nil, err
+	}
+	resp.Body.Close()
 
-// TODO
-//func (c *Catalog) Deregister() {
-//}
+	wm := &WriteMeta{}
+	wm.RequestTime = rtt
+
+	return wm, nil
+}
+
+func (c *Catalog) Deregister(dereg *CatalogDeregistration, q *WriteOptions) (*WriteMeta, error) {
+	r := c.c.newRequest("PUT", "/v1/catalog/deregister")
+	r.setWriteOptions(q)
+	r.obj = dereg
+	rtt, resp, err := requireOK(c.c.doRequest(r))
+	if err != nil {
+		return nil, err
+	}
+	resp.Body.Close()
+
+	wm := &WriteMeta{}
+	wm.RequestTime = rtt
+
+	return wm, nil
+}
 
 // Datacenters is used to query for all the known datacenters
 func (c *Catalog) Datacenters() ([]string, error) {
