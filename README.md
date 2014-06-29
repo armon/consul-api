@@ -2,24 +2,14 @@ consul-api
 ==========
 
 This package provides the `consulapi` package which attempts to
-provide programmatic access to the full Consul API. Eventually,
-all commands will be supported.
+provide programmatic access to the full Consul API.
+
+Currently, all of the Consul APIs included in version 0.3 are supported.
 
 Documentation
 =============
 
 The full documentation is available on [Godoc](http://godoc.org/github.com/armon/consul-api)
-
-Status
-======
-
-The current status of the API:
-* kv - Complete
-* session - Complete
-* status - Complete
-* agent - Complete
-* health - Complete
-* catalog - All query endpoints
 
 Usage
 =====
