@@ -145,13 +145,9 @@ func (r *request) setQueryOptions(q *QueryOptions) {
 	}
 	if q.WaitTime != 0 {
 		r.params.Set("wait", durToMsec(q.WaitTime))
-	} else if r.config.WaitTime != 0 {
-		r.params.Set("wait", durToMsec(r.config.WaitTime))
 	}
 	if q.Token != "" {
 		r.params.Set("token", q.Token)
-	} else if r.config.Token != "" {
-		r.params.Set("token", r.config.Token)
 	}
 }
 
@@ -171,8 +167,6 @@ func (r *request) setWriteOptions(q *WriteOptions) {
 	}
 	if q.Token != "" {
 		r.params.Set("token", q.Token)
-	} else if r.config.Token != "" {
-		r.params.Set("token", r.config.Token)
 	}
 }
 
@@ -211,6 +205,12 @@ func (c *Client) newRequest(method, path string) *request {
 	}
 	if c.config.Datacenter != "" {
 		r.params.Set("dc", c.config.Datacenter)
+	}
+	if c.config.WaitTime != 0 {
+		r.params.Set("wait", durToMsec(r.config.WaitTime))
+	}
+	if c.config.Token != "" {
+		r.params.Set("token", r.config.Token)
 	}
 	return r
 }
