@@ -1,5 +1,13 @@
 package consulapi
 
+const (
+	// ACLCLientType is the client type token
+	ACLClientType = "client"
+
+	// ACLManagementType is the management type token
+	ACLManagementType = "management"
+)
+
 // ACLEntry is used to represent an ACL entry
 type ACLEntry struct {
 	CreateIndex uint64
