@@ -113,6 +113,29 @@ func (s *Session) Destroy(id string, q *WriteOptions) (*WriteMeta, error) {
 	return wm, nil
 }
 
+// Renew renews the TTL on a given session
+func (s *Session) Renew(id string, q *WriteOptions) (*SessionEntry, *WriteMeta, error) {
+	r := s.c.newRequest("PUT", "/v1/session/renew/"+id)
+	r.setWriteOptions(q)
+	rtt, resp, err := requireOK(s.c.doRequest(r))
+	if err != nil {
+		return nil, nil, err
+	}
+	defer resp.Body.Close()
+
+	wm := &WriteMeta{RequestTime: rtt}
+
+	var entries []*SessionEntry
+	if err := decodeBody(resp, &entries); err != nil {
+		return nil, wm, err
+	}
+
+	if len(entries) > 0 {
+		return entries[0], wm, nil
+	}
+	return nil, wm, nil
+}
+
 // Info looks up a single session
 func (s *Session) Info(id string, q *QueryOptions) (*SessionEntry, *QueryMeta, error) {
 	r := s.c.newRequest("GET", "/v1/session/info/"+id)
