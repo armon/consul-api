@@ -74,6 +74,12 @@ func TestSession_Info(t *testing.T) {
 	if info.LockDelay == 0 {
 		t.Fatalf("bad: %v", info)
 	}
+	if info.Behavior != "release" {
+		t.Fatalf("bad: %v", info)
+	}
+	if info.TTL != "" {
+		t.Fatalf("bad: %v", info)
+	}
 }
 
 func TestSession_Node(t *testing.T) {
