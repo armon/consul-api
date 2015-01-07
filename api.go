@@ -223,14 +223,10 @@ func (r *request) toHTTP() (*http.Request, error) {
 
 	// Setup auth
 	if err == nil && r.config.HttpAuth != nil {
-		r.config.HttpAuth.auth(req)
+		req.SetBasicAuth(r.config.HttpAuth.Username, r.config.HttpAuth.Password)
 	}
 
 	return req, err
-}
-
-func (a *HttpBasicAuth) auth(req *http.Request) {
-	req.SetBasicAuth(a.Username, a.Password)
 }
 
 // newRequest is used to create a new request
