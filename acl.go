@@ -54,10 +54,10 @@ func (a *ACL) Update(acl *ACLEntry, q *WriteOptions) (*WriteMeta, error) {
 	r := a.c.newRequest("PUT", "/v1/acl/update")
 	r.setWriteOptions(q)
 	r.obj = acl
+	rtt, resp, err := requireOK(a.c.doRequest(r))
 	if resp != nil {
 		defer resp.Body.Close()
 	}
-	rtt, resp, err := requireOK(a.c.doRequest(r))
 	if err != nil {
 		return nil, err
 	}
