@@ -41,12 +41,13 @@ type AgentMember struct {
 
 // AgentServiceRegistration is used to register a new service
 type AgentServiceRegistration struct {
-	ID      string             `json:",omitempty"`
-	Name    string             `json:",omitempty"`
-	Tags    []string           `json:",omitempty"`
-	Port    int                `json:",omitempty"`
-	Address string             `json:"Address,omitempty"`
-	Check   *AgentServiceCheck `json:"Check"`
+	ID                string             `json:",omitempty"`
+	Name              string             `json:",omitempty"`
+	Tags              []string           `json:",omitempty"`
+	Port              int                `json:",omitempty"`
+	Address           string             `json:"Address,omitempty"`
+	EnableTagOverride bool           `json:"EnableTagOverride,omitempty"`
+	Check             *AgentServiceCheck `json:"Check"`
 }
 
 // AgentCheckRegistration is used to register a new check
@@ -60,10 +61,12 @@ type AgentCheckRegistration struct {
 // AgentServiceCheck is used to create an associated
 // check for a service
 type AgentServiceCheck struct {
-	HTTP     string `json:"HTTP,omitempty"`
-	Script   string `json:"Script,omitempty"`
-	Interval string `json:"Interval,omitempty"`
-	TTL      string `json:"TTL,omitempty"`
+	DeregisterCriticalServiceAfter string `json:"DeregisterCriticalServiceAfter,omitempty"`
+	HTTP                           string `json:"HTTP,omitempty"`
+	Script                         string `json:"Script,omitempty"`
+	Interval                       string `json:"Interval,omitempty"`
+	TTL                            string `json:"TTL,omitempty"`
+	Timeout                        string `json:"Timeout,omitempty"`
 }
 
 // Agent can be used to query the Agent endpoints
