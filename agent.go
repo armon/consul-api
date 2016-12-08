@@ -41,11 +41,13 @@ type AgentMember struct {
 
 // AgentServiceRegistration is used to register a new service
 type AgentServiceRegistration struct {
-	ID    string   `json:",omitempty"`
-	Name  string   `json:",omitempty"`
-	Tags  []string `json:",omitempty"`
-	Port  int      `json:",omitempty"`
-	Check *AgentServiceCheck
+	ID                string             `json:",omitempty"`
+	Name              string             `json:",omitempty"`
+	Tags              []string           `json:",omitempty"`
+	Port              int                `json:",omitempty"`
+	Address           string             `json:"Address,omitempty"`
+	EnableTagOverride bool           `json:"EnableTagOverride,omitempty"`
+	Check             *AgentServiceCheck `json:"Check"`
 }
 
 // AgentCheckRegistration is used to register a new check
@@ -59,14 +61,17 @@ type AgentCheckRegistration struct {
 // AgentServiceCheck is used to create an associated
 // check for a service
 type AgentServiceCheck struct {
-	Script   string `json:",omitempty"`
-	Interval string `json:",omitempty"`
-	TTL      string `json:",omitempty"`
+	DeregisterCriticalServiceAfter string `json:"DeregisterCriticalServiceAfter,omitempty"`
+	HTTP                           string `json:"HTTP,omitempty"`
+	Script                         string `json:"Script,omitempty"`
+	Interval                       string `json:"Interval,omitempty"`
+	TTL                            string `json:"TTL,omitempty"`
+	Timeout                        string `json:"Timeout,omitempty"`
 }
 
 // Agent can be used to query the Agent endpoints
 type Agent struct {
-	c *Client
+	c        *Client
 
 	// cache the node name
 	nodeName string
@@ -176,7 +181,7 @@ func (a *Agent) ServiceRegister(service *AgentServiceRegistration) error {
 // ServiceDeregister is used to deregister a service with
 // the local agent
 func (a *Agent) ServiceDeregister(serviceID string) error {
-	r := a.c.newRequest("PUT", "/v1/agent/service/deregister/"+serviceID)
+	r := a.c.newRequest("PUT", "/v1/agent/service/deregister/" + serviceID)
 	_, resp, err := requireOK(a.c.doRequest(r))
 	if err != nil {
 		return err
@@ -236,7 +241,7 @@ func (a *Agent) CheckRegister(check *AgentCheckRegistration) error {
 // CheckDeregister is used to deregister a check with
 // the local agent
 func (a *Agent) CheckDeregister(checkID string) error {
-	r := a.c.newRequest("PUT", "/v1/agent/check/deregister/"+checkID)
+	r := a.c.newRequest("PUT", "/v1/agent/check/deregister/" + checkID)
 	_, resp, err := requireOK(a.c.doRequest(r))
 	if err != nil {
 		return err
@@ -248,7 +253,7 @@ func (a *Agent) CheckDeregister(checkID string) error {
 // Join is used to instruct the agent to attempt a join to
 // another cluster member
 func (a *Agent) Join(addr string, wan bool) error {
-	r := a.c.newRequest("PUT", "/v1/agent/join/"+addr)
+	r := a.c.newRequest("PUT", "/v1/agent/join/" + addr)
 	if wan {
 		r.params.Set("wan", "1")
 	}
@@ -262,7 +267,7 @@ func (a *Agent) Join(addr string, wan bool) error {
 
 // ForceLeave is used to have the agent eject a failed node
 func (a *Agent) ForceLeave(node string) error {
-	r := a.c.newRequest("PUT", "/v1/agent/force-leave/"+node)
+	r := a.c.newRequest("PUT", "/v1/agent/force-leave/" + node)
 	_, resp, err := requireOK(a.c.doRequest(r))
 	if err != nil {
 		return err
